@@ -1,53 +1,87 @@
 import Phaser from "phaser";
 
-export default class Player extends Phaser.Physics.Arcade.Sprite {
-  static JUMP_UP = "jump_up";
+import { half } from "../util";
 
-  _animation!: Phaser.Animations.Animation;
-  _jumping = false;
+export interface Player {
+  gameRef: Phaser.Physics.Arcade.Sprite;
+  run(): void;
+  pause(): void;
+  jump(): void;
+  hit(): void;
+  resume(): void;
+}
 
-  constructor(scene: Phaser.Scene, x: number, y: number) {
-    super(scene, x, y, "player");
-    scene.add.existing(this);
-    scene.physics.add.existing(this);
-    this.setScale(2);
-    this.setBounce(0.2);
-    this.setCollideWorldBounds(true);
+export interface PlayerFactory {
+  load(scene: Phaser.Scene): void;
+  create(scene: Phaser.Scene, ground: Phaser.GameObjects.Shape): Player;
+}
 
+export const playerFactory: PlayerFactory = {
+  load(scene) {
+    scene.load.spritesheet("player", "assets/image/player.png", {
+      frameWidth: 21,
+      frameHeight: 33,
+    });
+    scene.load.audio("ouch", "assets/audio/ouchy.mp3");
+  },
+  create(scene, ground) {
+    let jumping = false;
+    const sprite = scene.physics.add.sprite(0, 0, "player");
+    sprite.setScale(2).refreshBody();
+    sprite.setBounce(0.2);
+    sprite.setCollideWorldBounds(true);
+    const {
+      x: groundX,
+      y: groundY,
+      width: groundWidth,
+      height: groundHeight,
+    } = ground;
+    const { displayWidth: playerWidth, displayHeight: playerHeight } = sprite;
+    const playerX = groundX - half(groundWidth) + half(playerWidth);
+    const playerY = groundY - half(groundHeight) - half(playerHeight);
+    sprite.setX(playerX);
+    sprite.setY(playerY);
+    const ouch = scene.sound.add("ouch");
     const animation = scene.anims.create({
       key: "run",
       frameRate: 10,
-      frames: this.anims.generateFrameNumbers("player", { start: 0, end: 7 }),
+      frames: scene.anims.generateFrameNumbers("player", { start: 0, end: 7 }),
       repeat: -1,
     }) as Phaser.Animations.Animation;
 
-    this._animation = animation;
+    const run = (): void => {
+      jumping = true;
+      sprite.play("run");
+    };
+    const pause = (): void => {
+      animation.pause();
+    };
+    const resume = (): void => {
+      jumping = false;
+      animation.resume();
+    };
+    const jump = (): void => {
+      if (jumping) {
+        return;
+      }
+      jumping = true;
+      pause();
+      sprite.setVelocityY(-300);
+    };
+    const hit = (): void => {
+      ouch.play();
+    };
 
-    this.on(Player.JUMP_UP, () => {
-      this.jump();
+    scene.input.on("pointerdown", () => {
+      jump();
     });
-  }
-
-  run(): void {
-    this._jumping = true;
-    this.play("run");
-  }
-
-  pause(): void {
-    this._animation.pause();
-  }
-
-  resume(): void {
-    this._jumping = false;
-    this._animation.resume();
-  }
-
-  jump(): void {
-    if (this._jumping) {
-      return;
-    }
-    this._jumping = true;
-    this.pause();
-    this.setVelocityY(-300);
-  }
-}
+    return {
+      gameRef: sprite,
+      run,
+      jump,
+      pause,
+      resume,
+      hit,
+    };
+  },
+};

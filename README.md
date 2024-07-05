@@ -1,6 +1,6 @@
-# Farm + Svelte
+# Elon Run
 
-This template should help you start developing using TypeScript in Farm.
+A simple side scroller game for my 3 year old boy.
 
 ## Setup
 

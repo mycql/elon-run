@@ -1,84 +1,51 @@
 import Phaser from "phaser";
 
-import Player from "./entities/player";
+import { Player, playerFactory as PlayerFactory } from "./entities/player";
+import { obstacleFactory as ObstacleFactory } from "./entities/obstacle";
+import { World, worldFactory as WorldFactory } from "./entities/world";
 
 const physics: Phaser.Types.Core.PhysicsConfig = {
   default: "arcade",
   arcade: {
     gravity: {
       y: 300,
+      x: 0,
     },
     debug: true,
   },
 };
 
 class GameScene extends Phaser.Scene {
-  private _sky!: Phaser.GameObjects.TileSprite;
-  private _horizon!: Phaser.GameObjects.TileSprite;
-  private _meadow!: Phaser.GameObjects.TileSprite;
+  private _world!: World;
   private _player!: Player;
   private _spaceKey?: Phaser.Input.Keyboard.Key;
 
   preload() {
-    this.load.image("sky", "assets/sky.png");
-    this.load.image("clouds", "assets/clouds.png");
-    this.load.image("horizon", "assets/horizon.png");
-    this.load.image("meadow", "assets/meadow.png");
-    this.load.spritesheet("player", "assets/player.png", {
-      frameWidth: 21,
-      frameHeight: 33,
-    });
+    PlayerFactory.load(this);
+    ObstacleFactory.load(this);
+    WorldFactory.load(this);
   }
 
   create() {
-    const gameWidth = this.sys.game.config.width as number;
-    const gameHeight = this.sys.game.config.height as number;
-    const centerX = gameWidth / 2;
-    const centerY = gameHeight / 2;
-    const worldWidth = 600;
-    const worldHeight = 300;
-    const sky = this.add.tileSprite(
-      centerX,
-      centerY,
-      worldWidth,
-      worldHeight,
-      "sky",
-    );
-    this._sky = sky;
-    const horizon = this.add.tileSprite(
-      centerX,
-      centerY,
-      worldWidth,
-      worldHeight,
-      "horizon",
-    );
-    this._horizon = horizon;
-    const meadow = this.add.tileSprite(
-      centerX,
-      centerY,
-      worldWidth,
-      worldHeight,
-      "meadow",
-    );
-    this._meadow = meadow;
-    const groundX = meadow.x;
-    const groundY = meadow.y + 110;
-    const groundWidth = meadow.width - 20;
-    const groundHeight = 10;
-    const ground = this.add.rectangle(
-      groundX,
-      groundY,
-      groundWidth,
-      groundHeight,
-    );
-    const player = new Player(this, 100, 0);
+    const world = WorldFactory.create(this);
+    const { ground } = world;
+    this._world = world;
+
+    const player = PlayerFactory.create(this, ground);
     player.run();
     this._player = player;
 
     const groundStatic = this.physics.add.staticGroup();
     groundStatic.add(ground);
-    this.physics.add.collider(player, groundStatic, () => {
+    this.physics.add.collider(player.gameRef, groundStatic, () => {
       player.resume();
+    });
+
+    const obstacles = ObstacleFactory.create(scene, ground);
+
+    this.physics.add.collider(obstacles.gameRef, groundStatic);
+    this.physics.add.collider(player.gameRef, obstacles.gameRef, () => {
+      this._player.hit();
     });
 
     const spaceKey = this.input.keyboard?.addKey(
@@ -88,19 +55,13 @@ class GameScene extends Phaser.Scene {
   }
 
   update() {
-    this._animateWorld();
+    this._world.update();
     const spaceKey = this._spaceKey;
     if (spaceKey) {
       if (Phaser.Input.Keyboard.JustDown(spaceKey)) {
         this._player.jump();
       }
     }
-  }
-
-  private _animateWorld() {
-    this._sky.tilePositionX += 1;
-    this._horizon.tilePositionX += 1.5;
-    this._meadow.tilePositionX += 2;
   }
 }
 
