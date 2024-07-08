@@ -47,7 +47,6 @@ class GameScene extends Phaser.Scene {
     this.physics.add.collider(player.gameRef, obstacles.gameRef, () => {
       this._player.hit();
     });
-
     const spaceKey = this.input.keyboard?.addKey(
       Phaser.Input.Keyboard.KeyCodes.SPACE,
     );
@@ -56,6 +55,7 @@ class GameScene extends Phaser.Scene {
 
   update() {
     this._world.update();
+    this._player.update();
     const spaceKey = this._spaceKey;
     if (spaceKey) {
       if (Phaser.Input.Keyboard.JustDown(spaceKey)) {

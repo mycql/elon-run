@@ -1,5 +1,7 @@
 {
   "vim_mode": true,
   "show_whitespaces": true,
-  "relative_line_numbers": true
+  "relative_line_numbers": true,
+  "ensure_final_newline_on_save": true,
+  "tab_size": 2
 }
