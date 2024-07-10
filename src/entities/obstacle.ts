@@ -11,10 +11,15 @@ export interface ObstacleFactory {
   create(scene: Phaser.Scene, ground: Phaser.GameObjects.Shape): Obstacles;
 }
 
+const obstacleKeys = Array.from({ length: 8 }, (_, index) => `${index + 1}`);
+
 export const obstacleFactory: ObstacleFactory = {
   load(scene) {
-    [1].forEach((value) => {
-      scene.load.image(`obstacle-${1}`, `assets/image/obstacle/${value}.png`);
+    obstacleKeys.forEach((obstacleKey) => {
+      scene.load.image(
+        `obstacle-${obstacleKey}`,
+        `assets/image/obstacle/${obstacleKey}.png`,
+      );
     });
   },
   create(scene, ground) {
@@ -25,29 +30,31 @@ export const obstacleFactory: ObstacleFactory = {
       height: groundHeight,
     } = ground;
     const group = scene.physics.add.group();
-    [1].forEach((value) => {
-      const generateObstacle = () => {
-        const obstacle = scene.physics.add.sprite(0, 0, `obstacle-${value}`);
-        obstacle.setY(
-          groundY - half(groundHeight) - half(obstacle.displayHeight),
-        );
-        scene.tweens.add({
-          targets: obstacle,
-          x: { from: groundWidth, to: -100 },
-          duration: 6000,
-          onComplete: () => {
-            obstacle.destroy();
-          },
-        });
-        obstacle.setX(groundX);
-        group.add(obstacle);
+    const generateObstacle = (obstacleTextureKey: string): void => {
+      const obstacle = scene.physics.add.sprite(0, 0, obstacleTextureKey);
+      obstacle.setY(
+        groundY - half(groundHeight) - half(obstacle.displayHeight),
+      );
+      scene.tweens.add({
+        targets: obstacle,
+        x: { from: groundWidth, to: -100 },
+        duration: 6000,
+        onComplete: () => {
+          obstacle.destroy();
+        },
+      });
+      obstacle.setX(groundX);
+      group.add(obstacle);
+    };
+    const generateRandomObstacle = (): void => {
+      scene.time.delayedCall(Phaser.Math.Between(2000, 6000), () => {
+        const obstacleKey = Phaser.Math.Between(1, obstacleKeys.length);
+        generateObstacle(`obstacle-${obstacleKey}`);
+        generateRandomObstacle();
+      });
+    };
+    generateRandomObstacle();
 
-        scene.time.delayedCall(Phaser.Math.Between(2000, 6000), () =>
-          generateObstacle(),
-        );
-      };
-      generateObstacle();
-    });
     return { gameRef: group };
   },
 };
