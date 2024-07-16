@@ -3,9 +3,12 @@ import Phaser from "phaser";
 import { half } from "../util";
 
 enum TextureKey {
+  PLAYER = "player",
+  IDLE = "idle",
   JUMP = "jump",
   RUN = "run",
   LAND = "land",
+  HEAD = "head",
 }
 
 enum AnimationKey {
@@ -33,21 +36,24 @@ export interface PlayerFactory {
 
 export const playerFactory: PlayerFactory = {
   load(scene) {
-    const frameWidth = 21;
-    const frameHeight = 33;
-    scene.load.spritesheet(TextureKey.RUN, "assets/image/player/run.png", {
-      frameWidth,
-      frameHeight,
-    });
-    scene.load.image(TextureKey.JUMP, "assets/image/player/jump.png");
-    scene.load.image(TextureKey.LAND, "assets/image/player/land.png");
     scene.load.audio(AudioKey.OUCH, "assets/audio/ouchy.mp3");
+    scene.load.atlas(
+      TextureKey.HEAD,
+      "assets/image/player/head.png",
+      "assets/image/player/head.json",
+    );
+    scene.load.atlas(
+      TextureKey.PLAYER,
+      "assets/image/player/player.png",
+      "assets/image/player/player.json",
+    );
   },
   create(scene, ground) {
-    const sprite = scene.physics.add.sprite(0, 0, TextureKey.RUN);
-    sprite.setScale(2).refreshBody();
-    sprite.setBounce(0.2);
-    sprite.setCollideWorldBounds(true);
+    const sprite = scene.physics.add
+      .sprite(0, 0, TextureKey.PLAYER, TextureKey.IDLE)
+      .setScale(0.7)
+      .setBounce(0.2)
+      .setCollideWorldBounds(true);
     const {
       x: groundX,
       y: groundY,
@@ -59,24 +65,34 @@ export const playerFactory: PlayerFactory = {
     const playerY = groundY - half(groundHeight) - half(playerHeight);
     sprite.setX(playerX);
     sprite.setY(playerY);
+
+    const headSprite = scene.add
+      .sprite(0, 0, TextureKey.HEAD, TextureKey.HEAD)
+      .setScale(0.85);
+
     const ouch = scene.sound.add(AudioKey.OUCH);
     const running = scene.anims.create({
       key: AnimationKey.RUN,
-      frameRate: 10,
-      frames: scene.anims.generateFrameNumbers(TextureKey.RUN, {
+      frameRate: 8,
+      frames: scene.anims.generateFrameNames(TextureKey.PLAYER, {
+        prefix: TextureKey.RUN,
         start: 0,
-        end: 7,
+        end: 3,
       }),
       repeat: -1,
     }) as Phaser.Animations.Animation;
 
     const isJumping = (): boolean => {
-      return sprite.texture.key === TextureKey.JUMP;
+      return sprite.frame.name === TextureKey.JUMP;
+    };
+
+    const isRunning = (): boolean => {
+      return !running.paused;
     };
 
     const run = (): void => {
+      sprite.setFrame(TextureKey.IDLE);
       sprite.play(AnimationKey.RUN);
-      sprite.setTexture(TextureKey.RUN);
     };
     const pause = (): void => {
       running.pause();
@@ -89,20 +105,31 @@ export const playerFactory: PlayerFactory = {
         return;
       }
       pause();
-      sprite.setTexture(TextureKey.JUMP);
+      sprite.setFrame(TextureKey.JUMP);
       sprite.setVelocityY(-300);
     };
     const hit = (): void => {
       ouch.play();
     };
     const update = (): void => {
+      headSprite.setY(sprite.y - 12);
       if (isJumping()) {
         const isGoingToLand =
           sprite.body.deltaY() > 0 &&
           sprite.body.facing === Phaser.Physics.Arcade.FACING_DOWN;
         if (isGoingToLand) {
-          sprite.setTexture(TextureKey.LAND);
+          headSprite.setY(sprite.y);
+          headSprite.setX(sprite.x + 2);
+          headSprite.setAngle(5);
+          sprite.setFrame(TextureKey.LAND);
+        } else {
+          headSprite.setY(sprite.y - 18);
+          headSprite.setX(sprite.x - 2);
+          headSprite.setAngle(-10);
         }
+      } else if (isRunning()) {
+        headSprite.setX(sprite.x + 6);
+        headSprite.setAngle(10);
       }
     };
 

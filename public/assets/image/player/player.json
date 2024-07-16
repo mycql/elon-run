@@ -1,0 +1,59 @@
+{
+  "frames": [
+    {
+      "filename": "idle",
+      "frame": { "x": 0, "y": 0, "w": 96, "h": 128 },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": { "x": 0, "y": 0, "w": 96, "h": 128 },
+      "sourceSize": { "w": 96, "h": 128 }
+    },
+    {
+      "filename": "jump",
+      "frame": { "x": 97, "y": 0, "w": 96, "h": 128 },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": { "x": 0, "y": 0, "w": 96, "h": 128 },
+      "sourceSize": { "w": 96, "h": 128 }
+    },
+    {
+      "filename": "land",
+      "frame": { "x": 0, "y": 129, "w": 96, "h": 128 },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": { "x": 0, "y": 0, "w": 96, "h": 128 },
+      "sourceSize": { "w": 96, "h": 128 }
+    },
+    {
+      "filename": "run0",
+      "frame": { "x": 97, "y": 129, "w": 96, "h": 128 },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": { "x": 0, "y": 0, "w": 96, "h": 128 },
+      "sourceSize": { "w": 96, "h": 128 }
+    },
+    {
+      "filename": "run1",
+      "frame": { "x": 194, "y": 0, "w": 96, "h": 128 },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": { "x": 0, "y": 0, "w": 96, "h": 128 },
+      "sourceSize": { "w": 96, "h": 128 }
+    },
+    {
+      "filename": "run2",
+      "frame": { "x": 194, "y": 129, "w": 96, "h": 128 },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": { "x": 0, "y": 0, "w": 96, "h": 128 },
+      "sourceSize": { "w": 96, "h": 128 }
+    }
+  ],
+  "meta": {
+    "app": "https://www.leshylabs.com/apps/sstool/",
+    "version": "Leshy SpriteSheet Tool v0.8.4",
+    "image": "player.png",
+    "size": { "w": 290, "h": 257 },
+    "scale": 1
+  }
+}
