@@ -1,8 +1,8 @@
 import Phaser from "phaser";
 
-import { Player, playerFactory as PlayerFactory } from "../entities/player";
-import { obstacleFactory as ObstacleFactory } from "../entities/obstacle";
-import { World, worldFactory as WorldFactory } from "../entities/world";
+import PlayerFactory, { Player } from "../entities/player";
+import WorldFactory, { World } from "../entities/world";
+import ObstacleFactory from "../entities/obstacle";
 
 class PlayScene extends Phaser.Scene {
   private _world!: World;

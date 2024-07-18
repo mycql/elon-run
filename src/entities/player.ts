@@ -147,3 +147,5 @@ export const playerFactory: PlayerFactory = {
     };
   },
 };
+
+export default playerFactory;

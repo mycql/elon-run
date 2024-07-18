@@ -58,3 +58,5 @@ export const obstacleFactory: ObstacleFactory = {
     return { gameRef: group };
   },
 };
+
+export default obstacleFactory;

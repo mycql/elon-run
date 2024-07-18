@@ -70,3 +70,5 @@ export const worldFactory: WorldFactory = {
     return { ground, update };
   },
 };
+
+export default worldFactory;
