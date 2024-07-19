@@ -3,6 +3,9 @@ import Phaser from "phaser";
 import PlayerFactory, { Player } from "../entities/player";
 import WorldFactory, { World } from "../entities/world";
 import ObstacleFactory from "../entities/obstacle";
+import HealthBarFactory from "../entities/healthbar";
+
+import { PlayerEvent } from "../events/event-types";
 
 class PlayScene extends Phaser.Scene {
   private _world!: World;
@@ -13,42 +16,46 @@ class PlayScene extends Phaser.Scene {
     PlayerFactory.load(this);
     ObstacleFactory.load(this);
     WorldFactory.load(this);
+    HealthBarFactory.load(this);
   }
 
   create() {
+    const self = this;
     const world = WorldFactory.create(this);
     const { ground } = world;
-    this._world = world;
+    self._world = world;
+
+    HealthBarFactory.create(scene);
 
     const player = PlayerFactory.create(this, ground);
-    player.run();
-    this._player = player;
+    self._player = player;
 
-    const groundStatic = this.physics.add.staticGroup();
+    const groundStatic = self.physics.add.staticGroup();
     groundStatic.add(ground);
-    this.physics.add.collider(player.gameRef, groundStatic, () => {
-      player.resume();
+    self.physics.add.collider(player.gameRef, groundStatic, () => {
+      self.events.emit(PlayerEvent.HIT_GROUND);
     });
 
     const obstacles = ObstacleFactory.create(scene, ground);
 
-    this.physics.add.collider(obstacles.gameRef, groundStatic);
-    this.physics.add.collider(player.gameRef, obstacles.gameRef, () => {
-      this._player.hit();
+    self.physics.add.collider(obstacles.gameRef, groundStatic);
+    self.physics.add.collider(player.gameRef, obstacles.gameRef, () => {
+      self.events.emit(PlayerEvent.HIT_OBSTACLE);
     });
-    const spaceKey = this.input.keyboard?.addKey(
+    const spaceKey = self.input.keyboard?.addKey(
       Phaser.Input.Keyboard.KeyCodes.SPACE,
     );
-    this._spaceKey = spaceKey;
+    self._spaceKey = spaceKey;
   }
 
   update() {
-    this._world.update();
-    this._player.update();
-    const spaceKey = this._spaceKey;
+    const self = this;
+    self._world.update();
+    self._player.update();
+    const spaceKey = self._spaceKey;
     if (spaceKey) {
       if (Phaser.Input.Keyboard.JustDown(spaceKey)) {
-        this._player.jump();
+        self.events.emit(PlayerEvent.JUMP);
       }
     }
   }

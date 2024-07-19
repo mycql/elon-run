@@ -1,6 +1,7 @@
 import Phaser from "phaser";
 
 import { half } from "../util";
+import { PlayerEvent } from "../events/event-types";
 
 enum TextureKey {
   PLAYER = "player",
@@ -71,13 +72,13 @@ export const playerFactory: PlayerFactory = {
       .setScale(0.85);
 
     const ouch = scene.sound.add(AudioKey.OUCH);
-    const running = scene.anims.create({
+    const running = sprite.anims.create({
       key: AnimationKey.RUN,
       frameRate: 8,
-      frames: scene.anims.generateFrameNames(TextureKey.PLAYER, {
+      frames: sprite.anims.generateFrameNames(TextureKey.PLAYER, {
         prefix: TextureKey.RUN,
         start: 0,
-        end: 3,
+        end: 2,
       }),
       repeat: -1,
     }) as Phaser.Animations.Animation;
@@ -106,7 +107,7 @@ export const playerFactory: PlayerFactory = {
       }
       pause();
       sprite.setFrame(TextureKey.JUMP);
-      sprite.setVelocityY(-300);
+      sprite.setVelocityY(-200);
     };
     const hit = (): void => {
       ouch.play();
@@ -136,6 +137,18 @@ export const playerFactory: PlayerFactory = {
     scene.input.on("pointerdown", () => {
       jump();
     });
+    scene.events.on(PlayerEvent.JUMP, () => {
+      jump();
+    });
+    scene.events.on(PlayerEvent.HIT_GROUND, () => {
+      resume();
+    });
+    scene.events.on(PlayerEvent.HIT_OBSTACLE, () => {
+      hit();
+    });
+
+    run();
+
     return {
       gameRef: sprite,
       run,
