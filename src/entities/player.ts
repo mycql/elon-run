@@ -1,7 +1,7 @@
 import Phaser from "phaser";
 
-import { half } from "../util";
-import { PlayerEvent } from "../events/event-types";
+import { PlayerEvent } from "../shared/events";
+import { IMAGE_ASSET_PATH } from "../shared";
 
 enum TextureKey {
   PLAYER = "player",
@@ -40,13 +40,13 @@ export const playerFactory: PlayerFactory = {
     scene.load.audio(AudioKey.OUCH, "assets/audio/ouchy.mp3");
     scene.load.atlas(
       TextureKey.HEAD,
-      "assets/image/player/head.png",
-      "assets/image/player/head.json",
+      `${IMAGE_ASSET_PATH}/player/head.png`,
+      `${IMAGE_ASSET_PATH}/player/head.json`,
     );
     scene.load.atlas(
       TextureKey.PLAYER,
-      "assets/image/player/player.png",
-      "assets/image/player/player.json",
+      `${IMAGE_ASSET_PATH}/player/player.png`,
+      `${IMAGE_ASSET_PATH}/player/player.json`,
     );
   },
   create(scene, ground) {
@@ -58,12 +58,13 @@ export const playerFactory: PlayerFactory = {
     const {
       x: groundX,
       y: groundY,
-      width: groundWidth,
-      height: groundHeight,
-    } = ground;
-    const { displayWidth: playerWidth, displayHeight: playerHeight } = sprite;
-    const playerX = groundX - half(groundWidth) + half(playerWidth);
-    const playerY = groundY - half(groundHeight) - half(playerHeight);
+      halfWidth: halfGroundWidth,
+      halfHeight: halfGroundHeight,
+    } = ground.body as Phaser.Physics.Arcade.Body;
+    const { halfWidth: halfPlayerWidth, halfHeight: halfPlayerHeight } =
+      sprite.body as Phaser.Physics.Arcade.Body;
+    const playerX = groundX - halfGroundWidth + halfPlayerWidth;
+    const playerY = groundY - halfGroundHeight - halfPlayerHeight;
     sprite.setX(playerX);
     sprite.setY(playerY);
 

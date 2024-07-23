@@ -1,7 +1,7 @@
 import Phaser from "phaser";
 
 import { half } from "../util";
-import { PlayerEvent } from "../events/event-types";
+import { PlayerEvent } from "../shared/events";
 
 enum TextureKey {
   HEAD = "head",
@@ -55,9 +55,8 @@ const healthBarFactory: HealthBarFactory = {
         },
       });
     };
-    // const { width: viewWidth, height: viewHeight } = scene.sys.game.config;
-    const containerX = 10 + half(faceSprite.displayWidth); //half(Number(viewWidth));
-    const containerY = 10 + half(faceSprite.displayHeight); //half(Number(viewHeight));
+    const containerX = 10 + half(faceSprite.displayWidth);
+    const containerY = 10 + half(faceSprite.displayHeight);
     const container = scene.add.container(containerX, containerY, [faceSprite]);
 
     scene.events.on(PlayerEvent.HIT_OBSTACLE, hit);

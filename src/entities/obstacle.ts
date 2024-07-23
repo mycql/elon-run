@@ -1,7 +1,5 @@
 import Phaser from "phaser";
 
-import { half } from "../util";
-
 export interface Obstacles {
   gameRef: Phaser.Physics.Arcade.Group;
 }
@@ -27,14 +25,13 @@ export const obstacleFactory: ObstacleFactory = {
       x: groundX,
       y: groundY,
       width: groundWidth,
-      height: groundHeight,
-    } = ground;
+      halfHeight: halfGroundHeight,
+    } = ground.body as Phaser.Physics.Arcade.Body;
     const group = scene.physics.add.group();
     const generateObstacle = (obstacleTextureKey: string): void => {
       const obstacle = scene.physics.add.sprite(0, 0, obstacleTextureKey);
-      obstacle.setY(
-        groundY - half(groundHeight) - half(obstacle.displayHeight),
-      );
+      const obstacleBody = obstacle.body as Phaser.Physics.Arcade.Body;
+      obstacle.setY(groundY - halfGroundHeight - obstacleBody.halfHeight);
       scene.tweens.add({
         targets: obstacle,
         x: { from: groundWidth, to: -100 },

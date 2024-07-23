@@ -1,5 +1,6 @@
 import Phaser from "phaser";
 
+import { IMAGE_ASSET_PATH } from "../shared";
 import { half } from "../util";
 
 export interface World {
@@ -14,10 +15,10 @@ export interface WorldFactory {
 
 export const worldFactory: WorldFactory = {
   load(scene) {
-    scene.load.image("sky", "assets/image/background/sky.png");
-    scene.load.image("clouds", "assets/image/background/clouds.png");
-    scene.load.image("horizon", "assets/image/background/horizon.png");
-    scene.load.image("meadow", "assets/image/background/meadow.png");
+    scene.load.image("sky", `${IMAGE_ASSET_PATH}/background/sky.png`);
+    scene.load.image("clouds", `${IMAGE_ASSET_PATH}/background/clouds.png`);
+    scene.load.image("horizon", `${IMAGE_ASSET_PATH}/background/horizon.png`);
+    scene.load.image("meadow", `${IMAGE_ASSET_PATH}/background/meadow.png`);
   },
   create(scene) {
     const gameWidth = scene.sys.game.config.width as number;
@@ -53,12 +54,13 @@ export const worldFactory: WorldFactory = {
     const groundY = meadow.y + 110;
     const groundWidth = meadow.width - 20;
     const groundHeight = 10;
-    const ground = scene.add.rectangle(
+    const groundBase = scene.add.rectangle(
       groundX,
       groundY,
       groundWidth,
       groundHeight,
     );
+    const ground = scene.physics.add.existing(groundBase, true);
     const update = (): void => {
       const skyVelocity = 1;
       const horizonVelocity = 1.6;

@@ -5,7 +5,19 @@ import WorldFactory, { World } from "../entities/world";
 import ObstacleFactory from "../entities/obstacle";
 import HealthBarFactory from "../entities/healthbar";
 
-import { PlayerEvent } from "../events/event-types";
+import { PlayerEvent } from "../shared/events";
+
+import { AssetManager, UITextureKey, IMAGE_ASSET_PATH } from "../shared";
+
+const SceneAssetManager: AssetManager = {
+  load(scene) {
+    scene.load.atlas(
+      UITextureKey.UI,
+      `${IMAGE_ASSET_PATH}/ui/ui.png`,
+      `${IMAGE_ASSET_PATH}/ui/ui.json`,
+    );
+  },
+};
 
 class PlayScene extends Phaser.Scene {
   private _world!: World;
@@ -13,6 +25,7 @@ class PlayScene extends Phaser.Scene {
   private _spaceKey?: Phaser.Input.Keyboard.Key;
 
   preload() {
+    SceneAssetManager.load(this);
     PlayerFactory.load(this);
     ObstacleFactory.load(this);
     WorldFactory.load(this);
@@ -30,15 +43,13 @@ class PlayScene extends Phaser.Scene {
     const player = PlayerFactory.create(this, ground);
     self._player = player;
 
-    const groundStatic = self.physics.add.staticGroup();
-    groundStatic.add(ground);
-    self.physics.add.collider(player.gameRef, groundStatic, () => {
+    self.physics.add.collider(player.gameRef, ground, () => {
       self.events.emit(PlayerEvent.HIT_GROUND);
     });
 
     const obstacles = ObstacleFactory.create(scene, ground);
 
-    self.physics.add.collider(obstacles.gameRef, groundStatic);
+    self.physics.add.collider(obstacles.gameRef, ground);
     self.physics.add.collider(player.gameRef, obstacles.gameRef, () => {
       self.events.emit(PlayerEvent.HIT_OBSTACLE);
     });

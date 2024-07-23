@@ -1,0 +1,27 @@
+{
+  "frames": [
+    {
+      "filename": "star",
+      "frame": { "x": 0, "y": 0, "w": 64, "h": 60 },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": { "x": 0, "y": 0, "w": 64, "h": 60 },
+      "sourceSize": { "w": 64, "h": 60 }
+    },
+    {
+      "filename": "star_outline",
+      "frame": { "x": 0, "y": 61, "w": 64, "h": 60 },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": { "x": 0, "y": 0, "w": 64, "h": 60 },
+      "sourceSize": { "w": 64, "h": 60 }
+    }
+  ],
+  "meta": {
+    "app": "https://www.leshylabs.com/apps/sstool/",
+    "version": "Leshy SpriteSheet Tool v0.8.4",
+    "image": "ui.png",
+    "size": { "w": 64, "h": 121 },
+    "scale": 1
+  }
+}
