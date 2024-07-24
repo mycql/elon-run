@@ -50,6 +50,7 @@ export const playerFactory: PlayerFactory = {
     );
   },
   create(scene, ground) {
+    let health = 5;
     const sprite = scene.physics.add
       .sprite(0, 0, TextureKey.PLAYER, TextureKey.IDLE)
       .setScale(0.7)
@@ -110,7 +111,12 @@ export const playerFactory: PlayerFactory = {
       sprite.setFrame(TextureKey.JUMP);
       sprite.setVelocityY(-200);
     };
+    const healthChanged = (): void => {
+      scene.events.emit(PlayerEvent.HEALTH_CHANGED, health);
+    };
     const hit = (): void => {
+      health--;
+      healthChanged();
       ouch.play();
     };
     const update = (): void => {
@@ -148,6 +154,7 @@ export const playerFactory: PlayerFactory = {
       hit();
     });
 
+    healthChanged();
     run();
 
     return {

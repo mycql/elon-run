@@ -3,5 +3,4 @@ export enum PlayerEvent {
   HIT_GROUND = "hit-ground",
   JUMP = "jump",
   RESUME = "resume",
-  HEALTH_CHANGED = "health-changed",
 }

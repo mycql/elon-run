@@ -1,6 +1,7 @@
 import Phaser from "phaser";
 
-import { half } from "../util";
+import { half, range } from "../util";
+import { UITextureKey } from "../shared/types";
 import { PlayerEvent } from "../shared/events";
 
 enum TextureKey {
@@ -24,23 +25,63 @@ const healthBarFactory: HealthBarFactory = {
     // do nothing
   },
   create(scene) {
-    let health = 100;
+    const componentGap = 5;
+    let health = 5;
     const faceSprite = scene.add.sprite(
       0,
       0,
       TextureKey.HEAD,
       TextureKey.HEAD_FOCUS,
     );
-    let isHurting = false;
+    const { displayWidth: faceWidth, displayHeight: faceHeight } = faceSprite;
+    const [halfFaceWidth, halfFaceHeight] = [faceWidth, faceHeight].map(half);
+
+    const containerX = 10 + halfFaceWidth;
+    const containerY = 10 + halfFaceHeight;
+    const container = scene.add.container(containerX, containerY, [faceSprite]);
+
+    let starSprites: Phaser.GameObjects.Sprite[] | undefined;
+    scene.events.once(PlayerEvent.HEALTH_CHANGED, (initialHealth: number) => {
+      health = initialHealth;
+      starSprites = range(initialHealth).map((_, index) => {
+        const starSprite = scene.add.sprite(
+          0,
+          0,
+          UITextureKey.UI,
+          UITextureKey.STAR,
+        );
+        const starWidth = starSprite.displayWidth;
+        const halfStarWidth = half(starWidth);
+        starSprite.setX(
+          halfFaceWidth + halfStarWidth * (index + 1) + componentGap * index,
+        );
+        starSprite.setScale(0.5);
+        return starSprite;
+      });
+      container.add(starSprites);
+    });
+    scene.events.on(PlayerEvent.HEALTH_CHANGED, (newHealth: number) => {
+      if (health === newHealth) {
+        return;
+      }
+      health = newHealth;
+      if (starSprites) {
+        const starSprite = starSprites[health];
+        if (starSprite) {
+          starSprite.setFrame(UITextureKey.START_OUTLINE);
+          scene.tweens.add({
+            targets: starSprite,
+            scale: { from: 0.7, to: 0.5 },
+            duration: 500,
+          });
+        }
+      }
+    });
+
     const recover = () => {
-      isHurting = false;
       faceSprite.setFrame(TextureKey.HEAD_FOCUS);
     };
     const hit = () => {
-      if (isHurting) {
-        return;
-      }
-      isHurting = true;
       faceSprite.setFrame(TextureKey.HEAD_SHOCK);
       scene.time.delayedCall(500, recover);
       scene.tweens.add({
@@ -55,9 +96,6 @@ const healthBarFactory: HealthBarFactory = {
         },
       });
     };
-    const containerX = 10 + half(faceSprite.displayWidth);
-    const containerY = 10 + half(faceSprite.displayHeight);
-    const container = scene.add.container(containerX, containerY, [faceSprite]);
 
     scene.events.on(PlayerEvent.HIT_OBSTACLE, hit);
 

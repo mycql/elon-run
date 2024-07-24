@@ -28,7 +28,7 @@ export const obstacleFactory: ObstacleFactory = {
       halfHeight: halfGroundHeight,
     } = ground.body as Phaser.Physics.Arcade.Body;
     const group = scene.physics.add.group();
-    const generateObstacle = (obstacleTextureKey: string): void => {
+    const generateObstacle = (id: string, obstacleTextureKey: string): void => {
       const obstacle = scene.physics.add.sprite(0, 0, obstacleTextureKey);
       const obstacleBody = obstacle.body as Phaser.Physics.Arcade.Body;
       obstacle.setY(groundY - halfGroundHeight - obstacleBody.halfHeight);
@@ -40,13 +40,17 @@ export const obstacleFactory: ObstacleFactory = {
           obstacle.destroy();
         },
       });
+      obstacle.setName(id);
       obstacle.setX(groundX);
       group.add(obstacle);
     };
     const generateRandomObstacle = (): void => {
       scene.time.delayedCall(Phaser.Math.Between(2000, 6000), () => {
         const obstacleKey = Phaser.Math.Between(1, obstacleKeys.length);
-        generateObstacle(`obstacle-${obstacleKey}`);
+        generateObstacle(
+          `${Phaser.Math.RND.uuid()}`,
+          `obstacle-${obstacleKey}`,
+        );
         generateRandomObstacle();
       });
     };

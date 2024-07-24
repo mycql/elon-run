@@ -1,4 +1,4 @@
-import Phaser from "phaser";
+import Phaser, { Physics } from "phaser";
 
 import PlayerFactory, { Player } from "../entities/player";
 import WorldFactory, { World } from "../entities/world";
@@ -47,12 +47,33 @@ class PlayScene extends Phaser.Scene {
       self.events.emit(PlayerEvent.HIT_GROUND);
     });
 
-    const obstacles = ObstacleFactory.create(scene, ground);
-
-    self.physics.add.collider(obstacles.gameRef, ground);
-    self.physics.add.collider(player.gameRef, obstacles.gameRef, () => {
+    let lastCollideObjectId: string | undefined | null;
+    type ColliderParams = Parameters<typeof self.physics.add.collider>;
+    const broadcastObstacleCollision: ColliderParams[2] = (_, obstacle) => {
+      const obstacleId = (
+        obstacle as Phaser.Types.Physics.Arcade.GameObjectWithBody
+      )?.name;
+      lastCollideObjectId = obstacleId;
       self.events.emit(PlayerEvent.HIT_OBSTACLE);
-    });
+    };
+    const shouldBroadcastObstacleCollision: ColliderParams[3] = (
+      _,
+      obstacle,
+    ) => {
+      const obstacleId = (
+        obstacle as Phaser.Types.Physics.Arcade.GameObjectWithBody
+      )?.name;
+      return obstacleId !== lastCollideObjectId;
+    };
+
+    const obstacles = ObstacleFactory.create(scene, ground);
+    self.physics.add.collider(obstacles.gameRef, ground);
+    self.physics.add.collider(
+      player.gameRef,
+      obstacles.gameRef,
+      broadcastObstacleCollision,
+      shouldBroadcastObstacleCollision,
+    );
     const spaceKey = self.input.keyboard?.addKey(
       Phaser.Input.Keyboard.KeyCodes.SPACE,
     );
